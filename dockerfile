@@ -21,6 +21,7 @@ RUN npx prisma generate
 # Build TypeScript → JavaScript
 RUN npm run build
 
+
 # -----------------------------
 # Stage 1: Production
 # -----------------------------
