@@ -7,7 +7,7 @@ describe('AppController', () => {
 
   // Mock the AppService
   const mockAppService = {
-    getHello: jest.fn().mockReturnValue('Hello World!'),
+    getHello: jest.fn().mockResolvedValue('Hello World!'),
   };
 
   beforeEach(async () => {
@@ -22,8 +22,9 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return "Hello World!"', async () => {
+      const result = await appController.getHello();
+      expect(result).toBe('Hello World!');
     });
   });
 });
