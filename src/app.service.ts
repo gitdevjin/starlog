@@ -8,6 +8,6 @@ export class AppService {
     const user = await this.prismaService.user.findMany();
 
     console.log(user);
-    return user;
+    return 'welcome to starlog!';
   }
 }
