@@ -39,6 +39,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - name: Prisma Generate
+        run: npx prisma generate
+        env:
+          DATABASE_URL: 'postgresql://user:password@localhost:5432/dummy?schema=public'
+
       - run: npm run test
 
   # -------------------------
@@ -52,7 +58,7 @@ jobs:
 
       - uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: Dockerfile
+          dockerfile: dockerfile
 
   # -------------------------
   # 4) Build & Push Docker Image
