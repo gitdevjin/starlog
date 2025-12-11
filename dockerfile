@@ -15,11 +15,8 @@ COPY ./prisma ./prisma
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build TypeScript → JavaScript
-RUN npm run build
+# Generate Prisma client && Build TypeScript → JavaScript
+RUN npx prisma generate && npm run build
 
 
 # -----------------------------
