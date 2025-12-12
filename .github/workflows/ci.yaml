@@ -87,4 +87,4 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/starlog-app:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/starlog-server:latest

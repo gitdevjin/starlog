@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import ms from 'ms';
 import { JwtConfig } from 'src/config/jwt.config';
 
 @Injectable()
