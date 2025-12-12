@@ -3,9 +3,21 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import authConfig from './config/auth.config';
+import jwtConfig from './config/jwt.config';
 
 @Module({
-  imports: [ConfigModule.forRoot(), PrismaModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [authConfig, jwtConfig],
+    }),
+    PrismaModule,
+    UserModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
