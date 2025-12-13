@@ -4,11 +4,17 @@ import { UserService } from './user.service';
 
 describe('UserController', () => {
   let controller: UserController;
+  let mockUserService: Partial<UserService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [UserService],
+      providers: [
+        {
+          provide: UserService,
+          useValue: mockUserService,
+        },
+      ],
     }).compile();
 
     controller = module.get<UserController>(UserController);

@@ -3,7 +3,7 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// npx prisma db push --force-reset =>> complete reset
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -14,8 +14,23 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  password     String?
+  email        String?  @unique
+  githubId     String?  @unique
+  refreshToken String?
+  createdAt    DateTime @default(now())
+  profile      Profile?
+}
+
+model Profile {
+  id        Int       @id @default(autoincrement())
+  nickname  String?
+  firstName String?
+  lastName  String?
+  bio       String?
+  dob       DateTime?
+  avatarUrl String?
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
