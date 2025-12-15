@@ -10,7 +10,7 @@ describe('AuthService', () => {
   let authService: AuthService;
   let mockConfigService: Partial<ConfigService>;
   let mockJwtService: Partial<JwtService>;
-  let mockUserService: Partial<UserService>;
+  let mockUserService: Partial<Record<keyof UserService, jest.Mock>>;
 
   beforeEach(async () => {
     mockConfigService = {
@@ -29,6 +29,8 @@ describe('AuthService', () => {
 
     mockUserService = {
       createUserWithEmail: jest.fn(),
+      getUserByEmail: jest.fn(),
+      updateRefreshToken: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -193,6 +195,79 @@ describe('AuthService', () => {
       });
 
       expect(result).toEqual(createdUser);
+    });
+  });
+
+  describe('authenticateUserWithEmail', () => {
+    it('should return the user if email exists and password is correct', async () => {
+      const userInput = { email: 'test@test.com', password: 'plainPassword' };
+      const userRecord = { email: 'test@test.com', password: 'hashedPassword' };
+
+      mockUserService.getUserByEmail.mockResolvedValue(userRecord);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
+
+      const result = await authService['authenticateUserWithEmail'](userInput);
+
+      expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(userInput.email);
+      expect(bcrypt.compare).toHaveBeenCalledWith(userInput.password, userRecord.password);
+      expect(result).toEqual(userRecord);
+    });
+
+    it('should throw UnauthorizedException if email does not exist', async () => {
+      const userInput = { email: 'test@test.com', password: 'plainPassword' };
+
+      mockUserService.getUserByEmail.mockResolvedValue(null);
+
+      await expect(authService['authenticateUserWithEmail'](userInput)).rejects.toThrow(
+        'Invalid email'
+      );
+    });
+
+    it('should throw UnauthorizedException if password is incorrect', async () => {
+      const userInput = { email: 'test@test.com', password: 'wrongPassword' };
+      const userRecord = { email: 'test@test.com', password: 'hashedPassword' };
+
+      mockUserService.getUserByEmail.mockResolvedValue(userRecord);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
+
+      await expect(authService['authenticateUserWithEmail'](userInput)).rejects.toThrow(
+        'Invalid password'
+      );
+    });
+  });
+
+  describe('loginWithEmail', () => {
+    it('should call authenticateUser and return tokens with cookieOptions', async () => {
+      const mockUser = { id: 'fakeId', email: 'test@test.com' };
+      const mockToken = { accessToken: 'mockAccessToken', refreshToken: 'mockRefreshToken' };
+
+      authService['authenticateUserWithEmail'] = jest.fn().mockResolvedValue(mockUser);
+      authService['generateTokens'] = jest.fn().mockReturnValue(mockToken);
+
+      const result = await authService.loginWithEmail({
+        email: 'test@test.com',
+        password: 'testPassword',
+      });
+
+      expect(authService['authenticateUserWithEmail']).toHaveBeenCalledWith({
+        email: 'test@test.com',
+        password: 'testPassword',
+      });
+
+      expect(mockUserService.updateRefreshToken).toHaveBeenCalledWith({
+        userId: mockUser.id,
+        refreshToken: mockToken.refreshToken,
+      });
+
+      expect(result).toEqual({
+        ...mockToken,
+        cookieOptions: expect.objectContaining({
+          httpOnly: true,
+          secure: false,
+          sameSite: 'none',
+          maxAge: expect.any(Number),
+        }),
+      });
     });
   });
 });

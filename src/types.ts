@@ -6,3 +6,20 @@ export interface JwtPayload {
   exp?: number; // expiration (auto-added by JWT)
   nbf?: number; // not before (optional)
 }
+
+export type UserEntity = {
+  id: string;
+  email: string;
+  password: string;
+  githubId?: string;
+  createdAt: Date;
+  profile?: ProfileEntity;
+};
+
+export type ProfileEntity = {
+  nickname?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  dob?: Date;
+};

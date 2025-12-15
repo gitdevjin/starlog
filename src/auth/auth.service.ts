@@ -2,11 +2,13 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { JwtConfig } from 'src/config/jwt.config';
-import { JwtPayload } from 'src/types';
+import { JwtPayload, UserEntity } from 'src/types';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthConfig } from 'src/config/auth.config';
+import { CookieOptions } from 'express';
 import * as bcrypt from 'bcrypt';
+import * as ms from 'ms';
 
 @Injectable()
 export class AuthService {
@@ -77,5 +79,52 @@ export class AuthService {
     });
 
     return newUser;
+  }
+
+  private async authenticateUserWithEmail({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) {
+    const userRecord = await this.userService.getUserByEmail(email);
+
+    if (!userRecord) {
+      throw new UnauthorizedException('Invalid email');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, userRecord.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    return userRecord;
+  }
+
+  private async issueTokensAndCookies(userId: string) {
+    const tokens = this.generateTokens(userId);
+
+    const ttl = this.configService.get<JwtConfig>('jwt').refreshTokenTtl;
+
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
+      maxAge: ms(ttl),
+    };
+
+    await this.userService.updateRefreshToken({
+      userId,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return { ...tokens, cookieOptions };
+  }
+
+  async loginWithEmail({ email, password }: { email: string; password: string }) {
+    const userRecord = await this.authenticateUserWithEmail({ email, password });
+    return this.issueTokensAndCookies(userRecord.id);
   }
 }
