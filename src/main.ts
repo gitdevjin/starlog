@@ -4,12 +4,22 @@ import { ValidationPipe } from '@nestjs/common';
 import { CLIENT_URL } from './lib/const';
 
 async function bootstrap() {
-  const allowedOrigins = [CLIENT_URL, 'https://another-client.com', 'http://localhost:5173'];
-
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (origin === 'http://localhost:5173') {
+        return callback(null, true);
+      }
+
+      if (origin === CLIENT_URL) {
+        return callback(null, true);
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   });
 
