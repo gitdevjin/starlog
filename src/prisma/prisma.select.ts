@@ -8,6 +8,8 @@ export const userPublicSelect = {
   profile: {
     select: {
       nickname: true,
+      firstName: true,
+      lastName: true,
       avatarUrl: true,
       bio: true,
       dob: true,

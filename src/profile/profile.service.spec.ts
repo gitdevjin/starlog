@@ -29,6 +29,11 @@ describe('ProfileService', () => {
     service = module.get<ProfileService>(ProfileService);
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
