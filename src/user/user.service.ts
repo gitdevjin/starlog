@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProfileService } from 'src/profile/profile.service';
-import { userPublicSelect } from 'src/prisma/prisma.select';
+import { UserPublicSelect } from 'src/prisma/prisma.select';
 import * as bcrypt from 'bcrypt';
 import { AuthConfig } from 'src/config/auth.config';
 import { ConfigService } from '@nestjs/config';
@@ -30,7 +30,7 @@ export class UserService {
         email: dto.email,
         password: dto.password,
       },
-      select: userPublicSelect,
+      select: UserPublicSelect,
     });
 
     const profile = await this.profileService.createProfile(user.id);
@@ -44,6 +44,15 @@ export class UserService {
         email,
       },
       include: { profile: true },
+    });
+  }
+
+  async getUserById(userId: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: UserPublicSelect,
     });
   }
 

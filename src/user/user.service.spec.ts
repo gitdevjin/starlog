@@ -5,6 +5,7 @@ import { ProfileService } from 'src/profile/profile.service';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { UserPublicSelect } from 'src/prisma/prisma.select';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -141,6 +142,39 @@ describe('UserService', () => {
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email },
         include: { profile: true },
+      });
+    });
+  });
+
+  describe('getUserById', () => {
+    it('should return user with profile', async () => {
+      const userId = '1234';
+
+      const mockUser = {
+        id: '1',
+        email: 'test@test.com',
+        createdAt: new Date(),
+        profile: {
+          id: 1,
+          nickname: 'testnick',
+          firstName: 'Test',
+          lastName: 'User',
+          bio: 'Hello',
+          dob: new Date('2000-01-01'),
+          avatarUrl: 'avatar.png',
+          userId: '1',
+        },
+      };
+
+      // Mock findUnique to return mockUser
+      (mockPrismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+
+      const result = await userService.getUserById(userId);
+
+      expect(result).toEqual(mockUser);
+      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: userId },
+        select: UserPublicSelect,
       });
     });
   });

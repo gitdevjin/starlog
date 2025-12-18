@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import authConfig from './config/auth.config';
 import jwtConfig from './config/jwt.config';
+import { APP_GUARD } from '@nestjs/core';
+import { GlobalTokenGuard } from './common/guard/global-token.guard';
 
 @Module({
   imports: [
@@ -21,6 +23,12 @@ import jwtConfig from './config/jwt.config';
     ProfileModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: GlobalTokenGuard,
+    },
+  ],
 })
 export class AppModule {}
