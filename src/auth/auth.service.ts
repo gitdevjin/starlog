@@ -133,14 +133,14 @@ export class AuthService {
     const refreshCookieOptions: CookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: ms(refreshTtl),
     };
 
     const accessCookieOptions: CookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: ms(accessTtl),
     };
 
@@ -148,8 +148,6 @@ export class AuthService {
       userId,
       refreshToken: tokens.refreshToken,
     });
-    console.log(accessCookieOptions);
-    console.log(refreshCookieOptions);
 
     return {
       accessToken: tokens.accessToken,
