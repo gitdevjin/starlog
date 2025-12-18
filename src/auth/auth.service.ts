@@ -34,6 +34,27 @@ export class AuthService {
     return token;
   }
 
+  decodeBasicToken(base64Credential: string) {
+    const decodedCredential = Buffer.from(base64Credential, 'base64').toString('utf8');
+
+    const separatorIdx = decodedCredential.indexOf(':');
+
+    if (separatorIdx === -1) {
+      throw new UnauthorizedException(
+        'Invalid Basic authentication format. Expected "email:password"'
+      );
+    }
+
+    const email = decodedCredential.slice(0, separatorIdx);
+    const password = decodedCredential.slice(separatorIdx + 1);
+
+    if (!email || !password) {
+      throw new UnauthorizedException('Email or password cannot be empty in Basic authentication');
+    }
+
+    return { email, password };
+  }
+
   private signToken(userId: string, tokenType: 'access' | 'refresh') {
     const { secret, accessTokenTtl, refreshTokenTtl } = this.configService.get<JwtConfig>('jwt');
 
@@ -106,25 +127,44 @@ export class AuthService {
   private async issueTokensAndCookies(userId: string) {
     const tokens = this.generateTokens(userId);
 
-    const ttl = this.configService.get<JwtConfig>('jwt').refreshTokenTtl;
+    const refreshTtl = this.configService.get<JwtConfig>('jwt').refreshTokenTtl;
+    const accessTtl = this.configService.get<JwtConfig>('jwt').accessTokenTtl;
 
-    const cookieOptions: CookieOptions = {
+    const refreshCookieOptions: CookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: ms(ttl),
+      sameSite: 'lax',
+      maxAge: ms(refreshTtl),
+    };
+
+    const accessCookieOptions: CookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: ms(accessTtl),
     };
 
     await this.userService.updateRefreshToken({
       userId,
       refreshToken: tokens.refreshToken,
     });
+    console.log(accessCookieOptions);
+    console.log(refreshCookieOptions);
 
-    return { ...tokens, cookieOptions };
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      accessCookieOptions,
+      refreshCookieOptions,
+    };
   }
 
   async loginWithEmail({ email, password }: { email: string; password: string }) {
     const userRecord = await this.authenticateUserWithEmail({ email, password });
     return this.issueTokensAndCookies(userRecord.id);
+  }
+
+  async refreshTokens(userId: string) {
+    return this.issueTokensAndCookies(userId);
   }
 }

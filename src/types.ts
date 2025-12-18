@@ -10,7 +10,7 @@ export interface JwtPayload {
 export type UserEntity = {
   id: string;
   email: string;
-  password: string;
+  password?: string;
   githubId?: string;
   createdAt: Date;
   profile?: ProfileEntity;

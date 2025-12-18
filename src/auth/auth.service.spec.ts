@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -261,13 +261,49 @@ describe('AuthService', () => {
 
       expect(result).toEqual({
         ...mockToken,
-        cookieOptions: expect.objectContaining({
+        accessCookieOptions: expect.objectContaining({
           httpOnly: true,
           secure: false,
-          sameSite: 'none',
+          sameSite: 'lax',
+          maxAge: expect.any(Number),
+        }),
+        refreshCookieOptions: expect.objectContaining({
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax',
           maxAge: expect.any(Number),
         }),
       });
+    });
+  });
+
+  describe('decodeBasicToken', () => {
+    it('should decode valid base64 credentials', () => {
+      const email = 'test@example.com';
+      const password = 'testPassword';
+      const base64 = Buffer.from(`${email}:${password}`).toString('base64');
+
+      const result = authService.decodeBasicToken(base64);
+
+      expect(result).toEqual({ email, password });
+    });
+
+    it('should throw if missing colon separator', () => {
+      const base64 = Buffer.from('invalidStrings').toString('base64');
+
+      expect(() => authService.decodeBasicToken(base64)).toThrow(UnauthorizedException);
+    });
+
+    it('should throw if email is empty', () => {
+      const base64 = Buffer.from(':password').toString('base64');
+
+      expect(() => authService.decodeBasicToken(base64)).toThrow(UnauthorizedException);
+    });
+
+    it('should throw if password is empty', () => {
+      const base64 = Buffer.from('test@example.com:').toString('base64');
+
+      expect(() => authService.decodeBasicToken(base64)).toThrow(UnauthorizedException);
     });
   });
 });

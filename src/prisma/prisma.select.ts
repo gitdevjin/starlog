@@ -1,6 +1,6 @@
 import { Prisma } from 'generated/prisma/client';
 
-export const userPublicSelect = {
+export const UserPublicSelect = {
   id: true,
   email: true,
   githubId: true,
