@@ -10,6 +10,8 @@ import authConfig from './config/auth.config';
 import jwtConfig from './config/jwt.config';
 import { APP_GUARD } from '@nestjs/core';
 import { GlobalTokenGuard } from './common/guard/global-token.guard';
+import { PostModule } from './post/post.module';
+import { S3Module } from './aws/s3.module';
 
 @Module({
   imports: [
@@ -18,9 +20,11 @@ import { GlobalTokenGuard } from './common/guard/global-token.guard';
       load: [authConfig, jwtConfig],
     }),
     PrismaModule,
+    S3Module,
     UserModule,
     AuthModule,
     ProfileModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [

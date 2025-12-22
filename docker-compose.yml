@@ -1,0 +1,11 @@
+services:
+  localstack:
+    # https://hub.docker.com/r/localstack/localstack
+    image: localstack/localstack
+    ports:
+      - '4566:4566'
+    environment:
+      # We only want to run S3
+      - SERVICES=s3
+      # We're always working in us-east-1
+      - DEFAULT_REGION=us-east-1

@@ -21,6 +21,8 @@ model User {
   refreshToken String?
   createdAt    DateTime @default(now())
   profile      Profile?
+  posts        Post[]
+  likes        Like[]
 }
 
 model Profile {
@@ -33,4 +35,25 @@ model Profile {
   avatarUrl String?
   userId    String    @unique
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  content   String
+  imageUrls String[]
+  view      Int      @default(0)
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+  authorId  String
+  user      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes     Like[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
