@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import path from 'path';
+import * as path from 'path';
 import { S3Service } from 'src/aws/s3.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -35,11 +35,13 @@ export class PostService {
         },
       });
 
-      console.log('Post Created');
+      console.log(`Post Created: ${post.id}`);
       return post;
-    } catch (error) {
-      await this.s3Service.deleteImagesByKey(s3Keys);
-
+    } catch (err: any) {
+      // clean up only successfully uploaded images
+      if (err.uploadedKeys?.length) {
+        await this.s3Service.deleteImagesByKey(err.uploadedKeys);
+      }
       throw new BadRequestException('Create Post Failed');
     }
   }

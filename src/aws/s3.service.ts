@@ -9,13 +9,17 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class S3Service {
   readonly s3client: S3Client;
-  private readonly endpointUrl =
-    process.env.S3_ENDPOINT || `https://s3.${process.env.AWS_REGION}.amazonaws.com`;
+  private readonly endpointUrl: string;
 
   constructor() {
+    const endpoint = process.env.AWS_S3_ENDPOINT_URL;
+    const region = process.env.AWS_REGION || 'us-east-1';
+
+    this.endpointUrl = endpoint ? endpoint : `https://s3.${region}.amazonaws.com`;
+
     this.s3client = new S3Client({
       region: process.env.AWS_REGION,
-      endpoint: process.env.S3_ENDPOINT, // e.g., LocalStack
+      endpoint: endpoint || undefined,
       forcePathStyle: true, // needed for LocalStack
       credentials: process.env.AWS_ACCESS_KEY_ID
         ? {
@@ -26,24 +30,34 @@ export class S3Service {
     });
   }
 
-  async uploadPostImages(s3Keys: string[], files: Express.Multer.File[]) {
-    return Promise.all(
-      files.map(async (file, index) => {
-        const s3Key = s3Keys[index];
-        const params = {
-          Bucket: process.env.AWS_S3_BUCKET_NAME,
-          Key: s3Key,
-          Body: file.buffer,
-          ContentType: file.mimetype,
-          ACL: 'public-read' as ObjectCannedACL,
-        };
+  async uploadPostImages(s3Keys: string[], files: Express.Multer.File[]): Promise<string[]> {
+    const uploadedKeys: string[] = [];
+    const imageUrls: string[] = [];
 
-        const command = new PutObjectCommand(params);
-        await this.s3client.send(command);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const s3Key = s3Keys[i];
 
-        return `${this.endpointUrl}/${process.env.AWS_S3_BUCKET_NAME}/${s3Key}`;
-      })
-    );
+      try {
+        await this.s3client.send(
+          new PutObjectCommand({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: s3Key,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+          })
+        );
+
+        uploadedKeys.push(s3Key);
+        imageUrls.push(`${this.endpointUrl}/${process.env.AWS_S3_BUCKET_NAME}/${s3Key}`);
+        console.log(`image saved: ${s3Key}`);
+      } catch (err) {
+        console.log(`failed to save image: ${err}`);
+        throw { error: err, uploadedKeys }; // throw the partially uploaded keys
+      }
+    }
+
+    return imageUrls;
   }
 
   async deleteImagesByKey(s3Keys: string[]) {
@@ -57,7 +71,7 @@ export class S3Service {
         });
 
         const response = await this.s3client.send(command);
-        console.log(`S3 Delete Response for ${key}: ${JSON.stringify(response)}`);
+        console.log(`Image Deleted : [${key}: ${JSON.stringify(response)}]`);
       } catch (err) {
         console.error(`Failed to delete S3 key ${key}: ${err}`);
       }
