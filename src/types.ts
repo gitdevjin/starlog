@@ -13,13 +13,27 @@ export type UserEntity = {
   password?: string;
   githubId?: string;
   createdAt: Date;
-  profile?: ProfileEntity;
+  stargate?: StargateEntity;
 };
 
-export type ProfileEntity = {
-  nickname?: string;
+export type PlanetEntity = {
+  id: number;
+  content: string;
+  imageUrls: string[];
+  viewCount: number;
+  gravityCount: number;
+  createdAt: Date;
+  creatorId: string;
+  user?: UserEntity;
+  gravities?: GravityEntity[];
+};
+
+export type StargateEntity = {
+  starname?: string;
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
   dob?: Date;
 };
+
+export type GravityEntity = {};
