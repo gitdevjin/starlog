@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { ProfileModule } from 'src/profile/profile.module';
+import { StargateModule } from 'src/stargate/stargate.module';
 
 @Module({
-  imports: [ProfileModule],
+  imports: [StargateModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

@@ -1,26 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PostController } from './post.controller';
-import { PostService } from './post.service';
+import { PlanetController } from './planet.controller';
+import { PlanetService } from './planet.service';
 
 describe('PostController', () => {
-  let controller: PostController;
-  let mockPostService: Partial<PostService>;
+  let controller: PlanetController;
+  let mockPostService: Partial<PlanetService>;
 
   beforeEach(async () => {
     mockPostService = {
-      createPost: jest.fn(),
+      createPlanet: jest.fn(),
     };
+
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [PostController],
+      controllers: [PlanetController],
       providers: [
         {
-          provide: PostService,
+          provide: PlanetService,
           useValue: mockPostService,
         },
       ],
     }).compile();
 
-    controller = module.get<PostController>(PostController);
+    controller = module.get<PlanetController>(PlanetController);
   });
 
   it('should be defined', () => {

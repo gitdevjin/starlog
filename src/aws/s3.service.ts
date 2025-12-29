@@ -30,7 +30,7 @@ export class S3Service {
     });
   }
 
-  async uploadPostImages(s3Keys: string[], files: Express.Multer.File[]): Promise<string[]> {
+  async uploadPlanetImages(s3Keys: string[], files: Express.Multer.File[]): Promise<string[]> {
     const uploadedKeys: string[] = [];
     const imageUrls: string[] = [];
 

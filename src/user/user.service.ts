@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ProfileService } from 'src/profile/profile.service';
+import { StargateService } from 'src/stargate/stargate.service';
 import { UserPublicSelect } from 'src/prisma/prisma.select';
 import * as bcrypt from 'bcrypt';
 import { AuthConfig } from 'src/config/auth.config';
@@ -13,7 +13,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly profileService: ProfileService
+    private readonly stargateService: StargateService
   ) {}
 
   async createUserWithEmail(dto: CreateUserDto) {
@@ -33,9 +33,9 @@ export class UserService {
       select: UserPublicSelect,
     });
 
-    const profile = await this.profileService.createProfile(user.id);
+    const stargate = await this.stargateService.createStargate(user.id);
 
-    return { ...user, profile };
+    return { ...user, stargate };
   }
 
   async getUserByEmail(email: string): Promise<UserEntity> {
@@ -43,7 +43,7 @@ export class UserService {
       where: {
         email,
       },
-      include: { profile: true },
+      include: { stargate: true },
     });
   }
 

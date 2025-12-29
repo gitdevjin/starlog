@@ -5,12 +5,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { ProfileModule } from './profile/profile.module';
+import { StargateModule } from './stargate/stargate.module';
 import authConfig from './config/auth.config';
 import jwtConfig from './config/jwt.config';
 import { APP_GUARD } from '@nestjs/core';
 import { GlobalTokenGuard } from './common/guard/global-token.guard';
-import { PostModule } from './post/post.module';
+import { PlanetModule } from './planet/planet.module';
 import { S3Module } from './aws/s3.module';
 
 @Module({
@@ -23,8 +23,8 @@ import { S3Module } from './aws/s3.module';
     S3Module,
     UserModule,
     AuthModule,
-    ProfileModule,
-    PostModule,
+    StargateModule,
+    PlanetModule,
   ],
   controllers: [AppController],
   providers: [
