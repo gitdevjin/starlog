@@ -1,24 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProfileService } from './profile.service';
+import { StargateService } from './stargate.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import * as randomNameGen from 'src/utils/random-name-generator';
 
 jest.mock('src/utils/random-name-generator');
-describe('ProfileService', () => {
-  let service: ProfileService;
+describe('StargateService', () => {
+  let service: StargateService;
   let mockPrismaService: Partial<PrismaService>;
 
   beforeEach(async () => {
     mockPrismaService = {
-      profile: {
+      stargate: {
         create: jest.fn(),
       } as any,
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ProfileService,
+        StargateService,
         {
           provide: PrismaService,
           useValue: mockPrismaService,
@@ -26,7 +26,7 @@ describe('ProfileService', () => {
       ],
     }).compile();
 
-    service = module.get<ProfileService>(ProfileService);
+    service = module.get<StargateService>(StargateService);
   });
 
   afterEach(() => {
@@ -38,34 +38,34 @@ describe('ProfileService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a profile with a random nickname', async () => {
+  it('should create a stargate with a random starname', async () => {
     // Arrange
     const userId = 'fake-user-123';
-    const nickname = 'cool-cat';
+    const starname = 'cool-cat';
 
     (randomNameGen.getRandomNickname as jest.Mock).mockReturnValue('cool-cat');
 
-    const expectedProfile = {
+    const expectedStargate = {
       id: 1,
       userId,
-      nickname,
+      starname,
     };
 
-    (mockPrismaService.profile.create as jest.Mock).mockResolvedValue(expectedProfile);
+    (mockPrismaService.stargate.create as jest.Mock).mockResolvedValue(expectedStargate);
 
     // Act
-    const result = await service.createProfile(userId);
+    const result = await service.createStargate(userId);
 
     // Assert
     expect(randomNameGen.getRandomNickname).toHaveBeenCalled();
 
-    expect(mockPrismaService.profile.create).toHaveBeenCalledWith({
+    expect(mockPrismaService.stargate.create).toHaveBeenCalledWith({
       data: {
         userId,
-        nickname,
+        starname,
       },
     });
 
-    expect(result).toEqual(expectedProfile);
+    expect(result).toEqual(expectedStargate);
   });
 });

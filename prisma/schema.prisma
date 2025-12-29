@@ -14,20 +14,20 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   password     String?
-  email        String?  @unique
-  githubId     String?  @unique
+  email        String?   @unique
+  githubId     String?   @unique
   refreshToken String?
-  createdAt    DateTime @default(now())
-  profile      Profile?
-  posts        Post[]
-  likes        Like[]
+  createdAt    DateTime  @default(now())
+  stargate     Stargate?
+  planets      Planet[]
+  gravities    Gravity[]
 }
 
-model Profile {
+model Stargate {
   id        Int       @id @default(autoincrement())
-  nickname  String?
+  starname  String?
   firstName String?
   lastName  String?
   bio       String?
@@ -37,23 +37,42 @@ model Profile {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  content   String
-  imageUrls String[]
-  view      Int      @default(0)
-  likeCount Int      @default(0)
-  createdAt DateTime @default(now())
-  authorId  String
-  user      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  likes     Like[]
+model Planet {
+  id           Int       @id @default(autoincrement())
+  content      String
+  imageUrls    String[]
+  moonCount    Int       @default(0)
+  viewCount    Int       @default(0)
+  gravityCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  creatorId    String
+  creator      User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  gravities    Gravity[]
+  moons        Moon[]
 }
 
-model Like {
+model Gravity {
   id        Int      @id @default(autoincrement())
-  postId    Int
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  planetId  Int
+  planet    Planet   @relation(fields: [planetId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creatorId String
+  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([creatorId, planetId])
+}
+
+model Moon {
+  id       Int    @id @default(autoincrement())
+  content  String
+  planetId Int
+  planet   Planet @relation(fields: [planetId], references: [id], onDelete: Cascade)
+
+  parentMoonId Int?
+  parentMoon   Moon?  @relation("MoonToParent", fields: [parentMoonId], references: [id])
+  childMoons   Moon[] @relation("MoonToParent")
+
+  rootMoonId   Int?
+  rootMoon     Moon?  @relation("MoonToRoot", fields: [rootMoonId], references: [id])
+  rootChildren Moon[] @relation("MoonToRoot")
 }

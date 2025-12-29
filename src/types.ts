@@ -24,7 +24,7 @@ export type PlanetEntity = {
   gravityCount: number;
   createdAt: Date;
   creatorId: string;
-  user?: UserEntity;
+  creator?: UserEntity;
   gravities?: GravityEntity[];
 };
 
@@ -36,4 +36,11 @@ export type StargateEntity = {
   dob?: Date;
 };
 
-export type GravityEntity = {};
+export type GravityEntity = {
+  id: number;
+  planetId: number;
+  planet: PlanetEntity;
+  createdAt: Date;
+  creatorId: string;
+  creator: UserEntity;
+};

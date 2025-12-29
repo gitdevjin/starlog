@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ProfileService } from 'src/profile/profile.service';
+import { StargateService } from 'src/stargate/stargate.service';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -11,7 +11,7 @@ describe('UserService', () => {
   let userService: UserService;
   let mockConfigService: Partial<ConfigService>;
   let mockPrismaService: Partial<PrismaService>;
-  let mockProfileService: Partial<ProfileService>;
+  let mockStargateService: Partial<StargateService>;
 
   beforeEach(async () => {
     mockPrismaService = {
@@ -20,13 +20,13 @@ describe('UserService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
       },
-      profile: {
+      stargate: {
         create: jest.fn(),
       },
     } as any;
 
-    mockProfileService = {
-      createProfile: jest.fn(),
+    mockStargateService = {
+      createStargate: jest.fn(),
     };
 
     mockConfigService = {
@@ -53,8 +53,8 @@ describe('UserService', () => {
           useValue: mockPrismaService,
         },
         {
-          provide: ProfileService,
-          useValue: mockProfileService,
+          provide: StargateService,
+          useValue: mockStargateService,
         },
       ],
     }).compile();
@@ -72,7 +72,7 @@ describe('UserService', () => {
   });
 
   describe('CreateUserWithEmail', () => {
-    it('should create a new user with profile', async () => {
+    it('should create a new user stargate', async () => {
       const dto = { email: 'test@test.com', password: '12345678' };
       const createdUser = { id: '1', email: dto.email };
 
@@ -82,21 +82,20 @@ describe('UserService', () => {
       // Mock Prisma create to return createdUser
       (mockPrismaService.user.create as jest.Mock).mockResolvedValue(createdUser);
 
-      // Mock profileService.createProfile to return profile
-      (mockProfileService.createProfile as jest.Mock).mockResolvedValue({ nickname: 'test' });
+      (mockStargateService.createStargate as jest.Mock).mockResolvedValue({ starname: 'test' });
 
       const result = await userService.createUserWithEmail(dto as any);
 
       expect(result).toEqual({
         ...createdUser,
-        profile: { nickname: 'test' },
+        stargate: { starname: 'test' },
       });
 
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email: dto.email },
       });
       expect(mockPrismaService.user.create).toHaveBeenCalled();
-      expect(mockProfileService.createProfile).toHaveBeenCalledWith('1');
+      expect(mockStargateService.createStargate).toHaveBeenCalledWith('1');
     });
 
     it('should throw BadRequestException if email exists', async () => {
@@ -113,7 +112,7 @@ describe('UserService', () => {
   });
 
   describe('getUserByEmail', () => {
-    it('should return user with profile', async () => {
+    it('should return user with stargate', async () => {
       const email = 'test@test.com';
 
       const mockUser = {
@@ -121,9 +120,9 @@ describe('UserService', () => {
         email,
         password: 'hashedPassword',
         createdAt: new Date(),
-        profile: {
+        stargate: {
           id: 1,
-          nickname: 'testnick',
+          starname: 'testnick',
           firstName: 'Test',
           lastName: 'User',
           bio: 'Hello',
@@ -141,22 +140,22 @@ describe('UserService', () => {
       expect(result).toEqual(mockUser);
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email },
-        include: { profile: true },
+        include: { stargate: true },
       });
     });
   });
 
   describe('getUserById', () => {
-    it('should return user with profile', async () => {
+    it('should return user with stargate', async () => {
       const userId = '1234';
 
       const mockUser = {
         id: '1',
         email: 'test@test.com',
         createdAt: new Date(),
-        profile: {
+        stargate: {
           id: 1,
-          nickname: 'testnick',
+          starname: 'testnick',
           firstName: 'Test',
           lastName: 'User',
           bio: 'Hello',

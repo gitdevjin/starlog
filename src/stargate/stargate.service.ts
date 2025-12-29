@@ -3,17 +3,17 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { getRandomNickname } from 'src/utils/random-name-generator';
 
 @Injectable()
-export class ProfileService {
+export class StargateService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createProfile(userId: string) {
-    const profile = await this.prisma.profile.create({
+  async createStargate(userId: string) {
+    const stargate = await this.prisma.stargate.create({
       data: {
         userId,
-        nickname: getRandomNickname(),
+        starname: getRandomNickname(),
       },
     });
 
-    return profile;
+    return stargate;
   }
 }

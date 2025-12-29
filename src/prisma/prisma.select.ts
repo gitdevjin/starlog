@@ -5,9 +5,9 @@ export const UserPublicSelect = {
   email: true,
   githubId: true,
   createdAt: true,
-  profile: {
+  stargate: {
     select: {
-      nickname: true,
+      starname: true,
       firstName: true,
       lastName: true,
       avatarUrl: true,
