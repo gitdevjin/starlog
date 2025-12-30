@@ -11,9 +11,11 @@ async function bootstrap() {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
 
-      const allowedOrigins = ['http://localhost:5173', CLIENT_URL];
+      if (origin === 'http://localhost:5173') {
+        return callback(null, true);
+      }
 
-      if (allowedOrigins.includes(origin)) {
+      if (origin === CLIENT_URL) {
         return callback(null, true);
       }
 
