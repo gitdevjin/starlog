@@ -125,7 +125,6 @@ export class AuthService {
   }
 
   private async issueTokensAndCookies(userId: string) {
-    const isProd = process.env.NODE_ENV === 'production';
     const tokens = this.generateTokens(userId);
 
     const refreshTtl = this.configService.get<JwtConfig>('jwt').refreshTokenTtl;
@@ -133,15 +132,15 @@ export class AuthService {
 
     const refreshCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: isProd, // must be true if sameSite is 'none'
-      sameSite: isProd ? 'none' : 'lax',
+      secure: true, // must be true if sameSite is 'none'
+      sameSite: 'none',
       maxAge: ms(refreshTtl),
     };
 
     const accessCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: ms(accessTtl),
     };
 
