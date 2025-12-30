@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { JwtConfig } from 'src/config/jwt.config';
-import { JwtPayload, UserEntity } from 'src/types';
+import { JwtPayload } from 'src/types';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthConfig } from 'src/config/auth.config';
@@ -125,6 +125,7 @@ export class AuthService {
   }
 
   private async issueTokensAndCookies(userId: string) {
+    const isProd = process.env.NODE_ENV === 'production';
     const tokens = this.generateTokens(userId);
 
     const refreshTtl = this.configService.get<JwtConfig>('jwt').refreshTokenTtl;
@@ -132,15 +133,15 @@ export class AuthService {
 
     const refreshCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProd, // must be true if sameSite is 'none'
+      sameSite: isProd ? 'none' : 'lax',
       maxAge: ms(refreshTtl),
     };
 
     const accessCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       maxAge: ms(accessTtl),
     };
 
