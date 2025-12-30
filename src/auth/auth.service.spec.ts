@@ -263,14 +263,14 @@ describe('AuthService', () => {
         ...mockToken,
         accessCookieOptions: expect.objectContaining({
           httpOnly: true,
-          secure: true,
-          sameSite: 'none',
+          secure: false,
+          sameSite: 'lax',
           maxAge: expect.any(Number),
         }),
         refreshCookieOptions: expect.objectContaining({
           httpOnly: true,
-          secure: true,
-          sameSite: 'none',
+          secure: false,
+          sameSite: 'lax',
           maxAge: expect.any(Number),
         }),
       });

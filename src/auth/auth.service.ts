@@ -132,15 +132,15 @@ export class AuthService {
 
     const refreshCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: true, // must be true if sameSite is 'none'
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: ms(refreshTtl),
     };
 
     const accessCookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: ms(accessTtl),
     };
 
