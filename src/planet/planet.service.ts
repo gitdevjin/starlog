@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import * as path from 'path';
 import { S3Service } from 'src/aws/s3.service';
@@ -97,6 +102,57 @@ export class PlanetService {
       }
       throw new BadRequestException('Create Planet Failed');
     }
+  }
+
+  async updatePlanet({
+    planetId,
+    content,
+    userId,
+  }: {
+    planetId: number;
+    content: string;
+    userId: string;
+  }) {
+    const planet = await this.prisma.planet.findUnique({ where: { id: planetId } });
+
+    if (!planet) {
+      throw new NotFoundException('Planet not found.');
+    }
+
+    if (planet.creatorId !== userId)
+      throw new ForbiddenException('You do not have permission to update this planet.');
+
+    const updatedPlanet = await this.prisma.planet.update({
+      where: { id: planetId },
+      data: {
+        content,
+      },
+    });
+
+    return updatedPlanet;
+  }
+
+  getS3KeyFromUrl(url: string) {
+    const urlObj = new URL(url);
+    const parts = urlObj.pathname.split('/');
+    return parts.slice(2).join('/');
+  }
+
+  async deletePlanet({ planetId, userId }: { planetId: number; userId: string }) {
+    const planet = await this.prisma.planet.findUnique({ where: { id: planetId } });
+
+    if (planet.creatorId !== userId)
+      throw new ForbiddenException('You do not have permission to delete this planet.');
+
+    const imageKeys = (planet.imageUrls || []).map((url) => this.getS3KeyFromUrl(url));
+
+    if (imageKeys.length > 0) {
+      await this.s3Service.deleteImagesByKey(imageKeys);
+    }
+
+    await this.prisma.planet.delete({ where: { id: planetId } });
+
+    return planet;
   }
 
   async togglePlanetGravity({ planetId, userId }: { planetId: number; userId: string }) {

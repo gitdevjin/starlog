@@ -2,9 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UploadedFiles,
@@ -15,6 +17,7 @@ import { CurrentUser } from 'src/common/decorator/user.decorator';
 import { UserEntity } from 'src/types';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreatePlanetDto } from './dto/create-planet.dto';
+import { UpdatePlanetDto } from './dto/update-planet.dto';
 
 @Controller('planet')
 export class PlanetController {
@@ -81,6 +84,20 @@ export class PlanetController {
       default:
         throw new BadRequestException('Invalid scope');
     }
+  }
+
+  @Patch(':planetId')
+  patchUpdatePlanet(
+    @Param('planetId', ParseIntPipe) planetId: number,
+    @Body() dto: UpdatePlanetDto,
+    @CurrentUser() user: UserEntity
+  ) {
+    return this.planetService.updatePlanet({ planetId, content: dto.content, userId: user.id });
+  }
+
+  @Delete(':planetId')
+  deletePlanet(@Param('planetId', ParseIntPipe) planetId: number, @CurrentUser() user: UserEntity) {
+    return this.planetService.deletePlanet({ planetId, userId: user.id });
   }
 
   @Post(':planetId/gravity')

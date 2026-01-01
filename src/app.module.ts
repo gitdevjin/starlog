@@ -12,6 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { GlobalTokenGuard } from './common/guard/global-token.guard';
 import { PlanetModule } from './planet/planet.module';
 import { S3Module } from './aws/s3.module';
+import { MoonModule } from './moon/moon.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { S3Module } from './aws/s3.module';
     AuthModule,
     StargateModule,
     PlanetModule,
+    MoonModule,
   ],
   controllers: [AppController],
   providers: [

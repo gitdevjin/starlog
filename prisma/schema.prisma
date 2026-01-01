@@ -23,6 +23,7 @@ model User {
   stargate     Stargate?
   planets      Planet[]
   gravities    Gravity[]
+  moons        Moon[]
 }
 
 model Stargate {
@@ -63,10 +64,13 @@ model Gravity {
 }
 
 model Moon {
-  id       Int    @id @default(autoincrement())
-  content  String
-  planetId Int
-  planet   Planet @relation(fields: [planetId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  content   String
+  planetId  Int
+  planet    Planet   @relation(fields: [planetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  creatorId String
+  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   parentMoonId Int?
   parentMoon   Moon?  @relation("MoonToParent", fields: [parentMoonId], references: [id])
