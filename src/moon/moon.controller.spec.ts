@@ -4,11 +4,12 @@ import { MoonService } from './moon.service';
 
 describe('MoonController', () => {
   let controller: MoonController;
+  let mockMoonService: Partial<MoonService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MoonController],
-      providers: [MoonService],
+      providers: [{ provide: MoonService, useValue: mockMoonService }],
     }).compile();
 
     controller = module.get<MoonController>(MoonController);

@@ -4,10 +4,10 @@ import { PlanetService } from './planet.service';
 
 describe('PostController', () => {
   let controller: PlanetController;
-  let mockPostService: Partial<PlanetService>;
+  let mockPlanetService: Partial<PlanetService>;
 
   beforeEach(async () => {
-    mockPostService = {
+    mockPlanetService = {
       createPlanet: jest.fn(),
     };
 
@@ -16,7 +16,7 @@ describe('PostController', () => {
       providers: [
         {
           provide: PlanetService,
-          useValue: mockPostService,
+          useValue: mockPlanetService,
         },
       ],
     }).compile();
