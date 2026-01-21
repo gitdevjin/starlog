@@ -79,4 +79,31 @@ export class S3Service {
 
     await Promise.all(deletePromises);
   }
+
+  async updateAvatarImage(s3Key: string, file: Express.Multer.File) {
+    const imageUrl = `${this.endpointUrl}/${process.env.AWS_S3_BUCKET_NAME}/${s3Key}`;
+    try {
+      const command = new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: s3Key,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+
+      await this.s3client.send(command);
+
+      return imageUrl;
+    } catch (err) {
+      console.error(`Failed to update S3 Image for Avatar ${s3Key}: ${err}`);
+    }
+  }
+
+  extractKeyFromUrl(url: string): string | null {
+    try {
+      const parsed = new URL(url);
+      return decodeURIComponent(parsed.pathname.slice(1));
+    } catch {
+      return null;
+    }
+  }
 }

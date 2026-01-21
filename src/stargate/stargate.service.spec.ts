@@ -3,10 +3,12 @@ import { StargateService } from './stargate.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import * as randomNameGen from 'src/utils/random-name-generator';
+import { S3Service } from 'src/aws/s3.service';
 
 jest.mock('src/utils/random-name-generator');
 describe('StargateService', () => {
   let service: StargateService;
+  let mockS3Service: Partial<S3Service>;
   let mockPrismaService: Partial<PrismaService>;
 
   beforeEach(async () => {
@@ -16,12 +18,21 @@ describe('StargateService', () => {
       } as any,
     };
 
+    mockS3Service = {
+      uploadPlanetImages: jest.fn(),
+      deleteImagesByKey: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         StargateService,
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: S3Service,
+          useValue: mockS3Service,
         },
       ],
     }).compile();

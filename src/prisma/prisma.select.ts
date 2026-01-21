@@ -11,6 +11,7 @@ export const UserPublicSelect = {
       firstName: true,
       lastName: true,
       avatarUrl: true,
+      coverUrl: true,
       bio: true,
       dob: true,
     },

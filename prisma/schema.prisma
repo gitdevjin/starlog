@@ -24,6 +24,8 @@ model User {
   planets      Planet[]
   gravities    Gravity[]
   moons        Moon[]
+  orbitings    Orbit[]   @relation("Orbiting") // users I follow (I am orbiter)
+  orbiters     Orbit[]   @relation("Orbited") // users who follow me (I am orbited)
 }
 
 model Stargate {
@@ -34,6 +36,7 @@ model Stargate {
   bio       String?
   dob       DateTime?
   avatarUrl String?
+  coverUrl  String?
   userId    String    @unique
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -79,4 +82,15 @@ model Moon {
   rootMoonId   Int?
   rootMoon     Moon?  @relation("MoonToRoot", fields: [rootMoonId], references: [id])
   rootChildren Moon[] @relation("MoonToRoot")
+}
+
+model Orbit {
+  id         Int      @id @default(autoincrement())
+  orbiterId  String //actor
+  orbitingId String //target
+  createdAt  DateTime @default(now())
+  orbiter    User     @relation("Orbiting", fields: [orbiterId], references: [id], onDelete: Cascade)
+  orbiting   User     @relation("Orbited", fields: [orbitingId], references: [id], onDelete: Cascade)
+
+  @@unique([orbiterId, orbitingId])
 }

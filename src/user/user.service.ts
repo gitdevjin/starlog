@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StargateService } from 'src/stargate/stargate.service';
@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthConfig } from 'src/config/auth.config';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from 'src/types';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -48,12 +49,27 @@ export class UserService {
   }
 
   async getUserById(userId: string) {
-    return this.prisma.user.findUnique({
+    if (!userId) {
+      throw new BadRequestException('userId is required');
+    }
+
+    // Optional but STRONGLY recommended
+    if (!isUUID(userId)) {
+      throw new BadRequestException('Invalid userId format');
+    }
+
+    const userWithStargate = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
       select: UserPublicSelect,
     });
+
+    if (!userWithStargate) {
+      throw new NotFoundException('User not found');
+    }
+
+    return userWithStargate;
   }
 
   async updateRefreshToken({ userId, refreshToken }: { userId: string; refreshToken: string }) {

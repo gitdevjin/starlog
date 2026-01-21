@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -75,5 +75,36 @@ export class MoonService {
     ]);
 
     return moon;
+  }
+
+  async updateMoon({
+    moonId,
+    content,
+    creatorId,
+  }: {
+    moonId: number;
+    content: string;
+    creatorId: string;
+  }) {
+    const existingMoon = await this.prisma.moon.findUnique({ where: { id: moonId } });
+
+    if (!existingMoon) throw new BadRequestException("The Moon doesn't exist");
+
+    if (existingMoon.creatorId !== creatorId)
+      throw new ForbiddenException('You do not have permission to update this moon.');
+
+    return await this.prisma.moon.update({
+      where: { id: moonId },
+      data: {
+        content,
+      },
+      include: {
+        creator: {
+          include: {
+            stargate: true,
+          },
+        },
+      },
+    });
   }
 }

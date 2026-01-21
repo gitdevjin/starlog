@@ -147,10 +147,10 @@ describe('UserService', () => {
 
   describe('getUserById', () => {
     it('should return user with stargate', async () => {
-      const userId = '1234';
+      const userId = 'c1b2f9a7-3a4d-4c8f-9e6b-1f7c2d9a0e31';
 
       const mockUser = {
-        id: '1',
+        id: 'c1b2f9a7-3a4d-4c8f-9e6b-1f7c2d9a0e31',
         email: 'test@test.com',
         createdAt: new Date(),
         stargate: {

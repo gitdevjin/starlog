@@ -58,6 +58,7 @@ export class PlanetController {
     @Query('scope') scope: 'universe' | 'orbit' | 'star',
     @Query('from', ParseIntPipe) from: number,
     @Query('to', ParseIntPipe) to: number,
+    @Query('creatorId') creatorId: string,
     @CurrentUser() user: UserEntity
   ) {
     switch (scope) {
@@ -72,14 +73,15 @@ export class PlanetController {
       // });
 
       case 'star':
-      // if (!creatorId) {
-      //   throw new BadRequestException('creatorId is required for star scope');
-      // }
-      // return this.planetService.getByCreator({
-      //   creatorId,
-      //   from,
-      //   to,
-      // });
+        if (!creatorId) {
+          throw new BadRequestException('creatorId is required for star scope');
+        }
+        return this.planetService.getPlanetsByCreator({
+          creatorId,
+          viewerId: user.id,
+          from,
+          to,
+        });
 
       default:
         throw new BadRequestException('Invalid scope');

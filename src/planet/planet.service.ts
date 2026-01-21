@@ -8,7 +8,6 @@ import { randomUUID } from 'crypto';
 import * as path from 'path';
 import { S3Service } from 'src/aws/s3.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PlanetEntity } from 'src/types';
 
 @Injectable()
 export class PlanetService {
@@ -70,6 +69,40 @@ export class PlanetService {
     }));
   }
 
+  async getPlanetsByCreator({
+    from,
+    to,
+    creatorId,
+    viewerId,
+  }: {
+    from: number;
+    to: number;
+    creatorId: string;
+    viewerId: string;
+  }) {
+    const planets = await this.prisma.planet.findMany({
+      where: { creatorId },
+      orderBy: { createdAt: 'desc' },
+      skip: from,
+      take: to - from + 1,
+      include: {
+        creator: {
+          include: { stargate: true },
+        },
+        gravities: {
+          where: { creatorId: viewerId },
+          select: { id: true },
+        },
+      },
+    });
+
+    return planets.map((planet) => ({
+      ...planet,
+      isGravityOn: planet.gravities.length > 0,
+      gravities: undefined,
+    }));
+  }
+
   async createPlanet({
     userId,
     content,
@@ -80,7 +113,7 @@ export class PlanetService {
     images: Express.Multer.File[];
   }) {
     const s3Keys = images.map(
-      (file) => `planets/${userId}/${randomUUID()}${path.extname(file.originalname)}`
+      (file) => `${userId}/planets/${randomUUID()}${path.extname(file.originalname)}`
     );
 
     try {
